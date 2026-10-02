@@ -41,11 +41,11 @@ jobs:
         run: bun run build
       - name: Prepare Pages output
         run: |
-          cp dist/client/index.html dist/client/404.html
-          touch dist/client/.nojekyll
+          cp .output/public/index.html .output/public/404.html
+          touch .output/public/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/client
+          path: .output/public
   deploy:
     needs: build
     runs-on: ubuntu-latest
