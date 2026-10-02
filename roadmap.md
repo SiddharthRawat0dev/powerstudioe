@@ -1,0 +1,3 @@
+- [x] Preserve the Power Studio wordmark, dot, and brand palette.
+- [x] Rebuild the homepage, start, grow, services, studio, and contact pages.
+- [x] Check mobile layout, interactions, and preview health.
