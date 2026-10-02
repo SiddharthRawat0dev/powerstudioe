@@ -1,0 +1,56 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore uploaded folder structure
+        run: |
+          mkdir -p src/assets src/components/ui src/routes src/hooks src/lib public
+          cp *.jpg src/assets/
+          cp favicon.svg robots.txt public/
+          cp site.tsx src/components/
+          cp use-mobile.tsx src/hooks/
+          cp error-capture.ts error-page.ts lovable-error-reporting.ts utils.ts src/lib/
+          cp routeTree.gen.ts router.tsx server.ts start.ts styles.css src/
+          cp __root.tsx contact.tsx grow.tsx index.tsx services.tsx start.tsx studio.tsx src/routes/
+          for file in *.tsx; do
+            case "$file" in
+              site.tsx|use-mobile.tsx|router.tsx|__root.tsx|contact.tsx|grow.tsx|index.tsx|services.tsx|start.tsx|studio.tsx) ;;
+              *) cp "$file" src/components/ui/ ;;
+            esac
+          done
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Build website
+        env:
+          GITHUB_PAGES: "true"
+          BASE_PATH: "/powerstudioe/"
+        run: bun run build
+      - name: Prepare Pages output
+        run: |
+          cp dist/client/index.html dist/client/404.html
+          touch dist/client/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/client
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
